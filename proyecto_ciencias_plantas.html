@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feria de Ciencias | Reacción de las Plantas a la Luz</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                    },
+                    colors: {
+                        darkbg: '#0f172a',
+                        cardbg: '#1e293b',
+                        neonGreen: '#4ade80',
+                        lightRed: '#ef4444',
+                        lightBlue: '#3b82f6',
+                        lightNat: '#fcd34d',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: theme('colors.darkbg');
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            border-radius: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(74, 222, 128, 0.15);
+            border-color: rgba(74, 222, 128, 0.4);
+        }
+
+        /* Scroll reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Light Glow Effects */
+        .glow-red { box-shadow: 0 0 40px rgba(239, 68, 68, 0.6); }
+        .glow-blue { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+        .glow-natural { box-shadow: 0 0 40px rgba(252, 211, 77, 0.4); }
+
+        /* Plant growth animation */
+        @keyframes grow {
+            0% { transform: scaleY(0.5) translateY(50%); opacity: 0; }
+            100% { transform: scaleY(1) translateY(0); opacity: 1; }
+        }
+        .plant-svg {
+            transform-origin: bottom center;
+            animation: grow 2s ease-out forwards;
+        }
+
+        /* Animated Gradient Background */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 15s infinite alternate ease-in-out;
+        }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+        
+        .bg-particles { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: -1; 
+            pointer-events: none; 
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Beautiful Animated Background -->
+    <canvas id="bg-particles" class="bg-particles"></canvas>
+    <div class="fixed inset-0 z-[-2] overflow-hidden pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-lightRed/10 rounded-full blur-[100px] mix-blend-screen animate-blob"></div>
+        <div class="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] bg-lightBlue/10 rounded-full blur-[100px] mix-blend-screen animate-blob animation-delay-2000"></div>
+        <div class="absolute bottom-[-20%] left-[20%] w-[60vw] h-[60vw] bg-neonGreen/10 rounded-full blur-[120px] mix-blend-screen animate-blob animation-delay-4000"></div>
+    </div>
+
+    <nav class="fixed w-full z-50 top-0 bg-darkbg/80 backdrop-blur-md border-b border-white/10 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-flask text-neonGreen text-2xl"></i>
+                <span class="font-heading font-bold text-xl tracking-wide text-white">Feria de Ciencias</span>
+            </div>
+            <div class="hidden md:flex gap-6 text-sm font-semibold text-gray-300">
+                <a href="#hipotesis" class="hover:text-neonGreen transition-colors">Hipótesis</a>
+                <a href="#teoria" class="hover:text-neonGreen transition-colors">Marco Teórico</a>
+                <a href="#experimento" class="hover:text-neonGreen transition-colors">El Experimento</a>
+                <a href="#resultados" class="hover:text-neonGreen transition-colors">Resultados</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-32 pb-20 px-6 min-h-[90vh] flex flex-col justify-center items-center text-center overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neonGreen/10 via-darkbg to-darkbg -z-10"></div>
+        
+        <div class="reveal">
+            <span class="inline-block py-1 px-3 rounded-full bg-neonGreen/20 text-neonGreen border border-neonGreen/30 text-sm font-bold tracking-widest mb-6">
+                PROYECTO DE INVESTIGACIÓN BOTÁNICA
+            </span>
+            <h1 class="text-5xl md:text-7xl font-heading font-extrabold mb-6 leading-tight">
+                ¿Cómo reaccionan las <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">PLANTAS</span> a diferentes <br> tipos de <span class="text-transparent bg-clip-text bg-gradient-to-r from-lightRed via-purple-500 to-lightBlue">LUZ?</span>
+            </h1>
+            <p class="text-xl text-gray-400 max-w-3xl mx-auto mb-10 font-light">
+                Estudiamos cómo distintos espectros y colores de luz artificial (Roja y Azul) y Natural afectan la tasa de fotosíntesis y el crecimiento estructural de las plantas.
+            </p>
+            
+            <a href="#hipotesis" class="inline-flex items-center gap-2 px-8 py-4 bg-neonGreen text-gray-900 font-bold rounded-full hover:bg-green-400 hover:shadow-[0_0_20px_rgba(74,222,128,0.5)] transition-all duration-300 transform hover:-translate-y-1">
+                Descubrir el Experimento <i class="fa-solid fa-arrow-down"></i>
+            </a>
+        </div>
+    </section>
+
+    <section id="hipotesis" class="py-20 px-6 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Objetivo -->
+                <div class="glass-card p-8 reveal">
+                    <div class="w-14 h-14 bg-neonGreen/20 rounded-2xl flex items-center justify-center mb-6 border border-neonGreen/30">
+                        <i class="fa-solid fa-bullseye text-neonGreen text-2xl"></i>
+                    </div>
+                    <h3 class="font-heading text-2xl font-bold mb-4 text-white">Nuestro Objetivo</h3>
+                    <p class="text-gray-300 leading-relaxed text-lg">
+                        Analizar científicamente cómo diferentes tipos de luz (espectros específicos) afectan directamente la tasa de fotosíntesis y el crecimiento físico (altura y número de hojas) de las plantas a lo largo del tiempo.
+                    </p>
+                </div>
+
+                <!-- Hipótesis -->
+                <div class="glass-card p-8 reveal" style="transition-delay: 100ms;">
+                    <div class="w-14 h-14 bg-purple-500/20 rounded-2xl flex items-center justify-center mb-6 border border-purple-500/30">
+                        <i class="fa-solid fa-lightbulb text-purple-400 text-2xl"></i>
+                    </div>
+                    <h3 class="font-heading text-2xl font-bold mb-4 text-white">Nuestra Hipótesis</h3>
+                    <p class="text-gray-300 leading-relaxed text-lg">
+                        Creemos que la <strong>luz roja</strong> y la <strong>luz azul</strong> favorecen en mayor medida la fotosíntesis y el crecimiento acelerado en comparación con la luz natural (o blanca común), debido a que estos espectros son los más absorbidos por la clorofila.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="teoria" class="py-24 px-6 relative">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 reveal">
+                <h2 class="font-heading text-4xl md:text-5xl font-bold mb-4">La Ciencia Detrás de la Luz</h2>
+                <p class="text-gray-400 max-w-2xl mx-auto">Para entender nuestra hipótesis, primero debemos profundizar en cómo las plantas "comen" y "ven" la luz.</p>
+            </div>
+
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Fotosintesis Basica -->
+                <div class="glass-card p-6 reveal">
+                    <h4 class="font-bold text-xl text-neonGreen mb-3 border-b border-neonGreen/20 pb-2">1. La Fotosíntesis</h4>
+                    <p class="text-gray-300 text-sm mb-4">Es el proceso biológico por el cual las plantas usan la luz para producir su propio alimento (glucosa) a partir de dióxido de carbono y agua.</p>
+                    <div class="bg-darkbg p-4 rounded-lg text-center font-mono text-sm text-gray-400 border border-white/5">
+                        Luz + CO₂ + H₂O &rarr; O₂ + Glucosa
+                    </div>
+                </div>
+
+                <!-- Absorción (INFO EXTRA) -->
+                <div class="glass-card p-6 reveal" style="transition-delay: 100ms;">
+                    <h4 class="font-bold text-xl text-lightBlue mb-3 border-b border-lightBlue/20 pb-2">2. Espectro de Absorción</h4>
+                    <p class="text-gray-300 text-sm">
+                        Las plantas son verdes porque <strong>reflejan</strong> la luz verde. Sus pigmentos principales (Clorofila A y B) absorben la energía lumínica casi exclusivamente en las longitudes de onda del <strong>Azul (400-500nm)</strong> y el <strong>Rojo (600-700nm)</strong>.
+                    </p>
+                </div>
+
+                <!-- Fotorreceptores (INFO EXTRA) -->
+                <div class="glass-card p-6 reveal" style="transition-delay: 200ms;">
+                    <h4 class="font-bold text-xl text-lightRed mb-3 border-b border-lightRed/20 pb-2">3. Fotorreceptores</h4>
+                    <ul class="text-gray-300 text-sm space-y-3">
+                        <li><strong class="text-lightRed">Fitocromos (Luz Roja):</strong> Regulan la germinación, elongación del tallo y floración.</li>
+                        <li><strong class="text-lightBlue">Criptocromos (Luz Azul):</strong> Controlan la apertura de los estomas, el ritmo circadiano y el fototropismo (crecer hacia la luz).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="experimento" class="py-20 px-6 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="font-heading text-4xl font-bold mb-12 text-center reveal">Metodología del Experimento</h2>
+            
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="reveal">
+                    <h3 class="text-2xl font-bold mb-6 text-white flex items-center gap-3">
+                        <i class="fa-solid fa-clipboard-list text-neonGreen"></i> Variables
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="bg-cardbg p-4 rounded-xl border-l-4 border-lightRed">
+                            <h4 class="font-bold text-gray-200">Variable Independiente</h4>
+                            <p class="text-gray-400 text-sm">El color/espectro de la luz (Roja, Azul o Natural).</p>
+                        </div>
+                        <div class="bg-cardbg p-4 rounded-xl border-l-4 border-neonGreen">
+                            <h4 class="font-bold text-gray-200">Variables Controladas</h4>
+                            <p class="text-gray-400 text-sm">Misma especie de planta, idéntica cantidad de agua, mismo sustrato (tierra), misma temperatura ambiental y exacto tiempo de exposición diaria a la luz.</p>
+                        </div>
+                        <div class="bg-cardbg p-4 rounded-xl border-l-4 border-lightBlue">
+                            <h4 class="font-bold text-gray-200">Variable Dependiente</h4>
+                            <p class="text-gray-400 text-sm">El crecimiento observable de la planta (altura en centímetros y número de hojas nuevas).</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="reveal glass-card p-8">
+                    <h3 class="text-2xl font-bold mb-6 text-white flex items-center gap-3">
+                        <i class="fa-solid fa-list-ol text-neonGreen"></i> Procedimiento
+                    </h3>
+                    <ul class="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-600 before:to-transparent">
+                        <li class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-800 text-neonGreen font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-[0_0_10px_rgba(74,222,128,0.5)] z-10">1</div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-cardbg p-4 rounded-lg border border-white/10">Colocamos 3 plantas iguales en compartimentos aislados lumínicamente.</div>
+                        </li>
+                        <li class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-800 text-neonGreen font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">2</div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-cardbg p-4 rounded-lg border border-white/10">Las iluminamos exclusivamente con luz roja, luz azul y luz natural (blanca).</div>
+                        </li>
+                        <li class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-800 text-neonGreen font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">3</div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-cardbg p-4 rounded-lg border border-white/10">Mantenemos las condiciones de riego y temperatura exactamente iguales durante 21 días.</div>
+                        </li>
+                        <li class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-slate-800 text-neonGreen font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">4</div>
+                            <div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-cardbg p-4 rounded-lg border border-white/10">Observamos, registramos fotografías y medimos su crecimiento semanalmente.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-24 px-6 overflow-hidden">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12 reveal">
+                <h2 class="font-heading text-4xl font-bold mb-4">Laboratorio Interactivo</h2>
+                <p class="text-gray-400">Enciende las luces para ver la simulación de cómo crecieron las plantas en su cabina (Día 21).</p>
+            </div>
+
+            <!-- Cabinas de Luz -->
+            <div class="grid md:grid-cols-3 gap-6 bg-black/50 p-6 rounded-2xl border border-white/10 reveal">
+                
+                <!-- Planta Roja -->
+                <div class="relative bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col items-center min-h-[400px] overflow-hidden group">
+                    <div id="light-bulb-red" class="w-16 h-8 bg-gray-800 rounded-b-full mb-8 z-10 transition-all duration-500 flex items-center justify-center cursor-pointer" onclick="toggleLight('red')">
+                        <i class="fa-solid fa-power-off text-gray-500 text-xs"></i>
+                    </div>
+                    <div id="beam-red" class="absolute top-12 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-lightRed/40 to-transparent opacity-0 transition-opacity duration-500 z-0 clip-polygon"></div>
+                    
+                    <div class="mt-auto relative z-10 flex flex-col items-center w-full">
+                        <!-- SVG Plant -->
+                        <svg class="plant-svg w-32 h-48 transition-all duration-700" viewBox="0 0 100 150" fill="none" id="plant-red">
+                            <path d="M50,150 C50,100 45,70 50,20" stroke="#22c55e" stroke-width="4" stroke-linecap="round"/>
+                            <!-- Hojas Altas (Crecimiento Rojo) -->
+                            <path d="M50,110 Q20,100 25,80 Q40,90 50,110" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-100 leaf-red"/>
+                            <path d="M50,90 Q80,80 75,60 Q60,70 50,90" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-200 leaf-red"/>
+                            <path d="M50,60 Q20,50 30,30 Q45,45 50,60" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-300 leaf-red"/>
+                            <path d="M50,40 Q80,30 70,10 Q55,25 50,40" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-400 leaf-red"/>
+                        </svg>
+                        <div class="w-24 h-12 bg-slate-800 rounded-b-lg border-t-8 border-yellow-800 mt-2 z-20"></div>
+                        <div class="mt-4 px-4 py-1 bg-lightRed/20 border border-lightRed text-lightRed font-bold rounded">LUZ ROJA</div>
+                    </div>
+                </div>
+
+                <!-- Planta Azul -->
+                <div class="relative bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col items-center min-h-[400px] overflow-hidden group">
+                    <div id="light-bulb-blue" class="w-16 h-8 bg-gray-800 rounded-b-full mb-8 z-10 transition-all duration-500 flex items-center justify-center cursor-pointer" onclick="toggleLight('blue')">
+                        <i class="fa-solid fa-power-off text-gray-500 text-xs"></i>
+                    </div>
+                    <div id="beam-blue" class="absolute top-12 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-lightBlue/40 to-transparent opacity-0 transition-opacity duration-500 z-0"></div>
+                    
+                    <div class="mt-auto relative z-10 flex flex-col items-center w-full">
+                        <svg class="plant-svg w-32 h-32 transition-all duration-700" viewBox="0 0 100 150" fill="none" id="plant-blue">
+                            <path d="M50,150 C50,120 52,90 50,60" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
+                            <!-- Hojas Frondosas (Crecimiento Azul) -->
+                            <path d="M50,120 Q10,110 15,80 Q35,100 50,120" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-100 leaf-blue"/>
+                            <path d="M50,100 Q90,90 85,60 Q65,80 50,100" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-200 leaf-blue"/>
+                            <path d="M50,80 Q10,70 20,40 Q40,60 50,80" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-300 leaf-blue"/>
+                            <path d="M50,70 Q80,60 70,40 Q55,55 50,70" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-400 leaf-blue"/>
+                        </svg>
+                        <div class="w-24 h-12 bg-slate-800 rounded-b-lg border-t-8 border-yellow-800 mt-2 z-20"></div>
+                        <div class="mt-4 px-4 py-1 bg-lightBlue/20 border border-lightBlue text-lightBlue font-bold rounded">LUZ AZUL</div>
+                    </div>
+                </div>
+
+                <!-- Planta Natural -->
+                <div class="relative bg-gray-900 border border-gray-700 rounded-xl p-4 flex flex-col items-center min-h-[400px] overflow-hidden group">
+                    <div id="light-bulb-natural" class="w-16 h-8 bg-gray-800 rounded-b-full mb-8 z-10 transition-all duration-500 flex items-center justify-center cursor-pointer" onclick="toggleLight('natural')">
+                        <i class="fa-solid fa-power-off text-gray-500 text-xs"></i>
+                    </div>
+                    <div id="beam-natural" class="absolute top-12 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-lightNat/30 to-transparent opacity-0 transition-opacity duration-500 z-0"></div>
+                    
+                    <div class="mt-auto relative z-10 flex flex-col items-center w-full">
+                        <svg class="plant-svg w-32 h-20 transition-all duration-700" viewBox="0 0 100 150" fill="none" id="plant-natural">
+                            <path d="M50,150 C48,130 50,110 50,90" stroke="#22c55e" stroke-width="3" stroke-linecap="round"/>
+                            <!-- Hojas Pequeñas -->
+                            <path d="M50,130 Q30,120 35,100 Q45,110 50,130" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-100 leaf-natural"/>
+                            <path d="M50,110 Q70,100 65,85 Q55,95 50,110" fill="#16a34a" class="opacity-50 transition-all duration-700 delay-200 leaf-natural"/>
+                        </svg>
+                        <div class="w-24 h-12 bg-slate-800 rounded-b-lg border-t-8 border-yellow-800 mt-2 z-20"></div>
+                        <div class="mt-4 px-4 py-1 bg-gray-700 border border-gray-400 text-gray-300 font-bold rounded">LUZ NATURAL</div>
+                    </div>
+                </div>
+
+            </div>
+            <p class="text-center text-xs text-gray-500 mt-4"><i class="fa-solid fa-hand-pointer animate-pulse"></i> Haz clic en los focos para encender la simulación.</p>
+        </div>
+    </section>
+
+    <section id="resultados" class="py-20 px-6 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+            
+            <div class="reveal">
+                <h2 class="font-heading text-4xl font-bold mb-6">Observaciones y Resultados Proyectados</h2>
+                <p class="text-gray-300 mb-6">
+                    Llevamos a cabo este experimento de forma práctica. Aunque el registro duró pocos días y no tomamos valores numéricos de altura a largo plazo, <strong>logramos observar un crecimiento visiblemente más acelerado en las raíces</strong> de la planta expuesta a la luz roja. Los datos inferiores muestran la proyección esperada basada en la teoría y en nuestra observación temprana.
+                </p>
+
+                <!-- Data cards -->
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="bg-cardbg border-t-4 border-lightRed p-4 rounded-b-lg text-center">
+                        <div class="text-3xl font-bold text-white mb-1">15 <span class="text-sm text-gray-500">cm</span></div>
+                        <div class="text-xs text-lightRed uppercase font-bold">Luz Roja</div>
+                        <div class="text-[10px] text-gray-400 mt-2 leading-tight">Proyección esperada.</div>
+                    </div>
+                    <div class="bg-cardbg border-t-4 border-lightBlue p-4 rounded-b-lg text-center">
+                        <div class="text-3xl font-bold text-white mb-1">8 <span class="text-sm text-gray-500">cm</span></div>
+                        <div class="text-xs text-lightBlue uppercase font-bold">Luz Azul</div>
+                        <div class="text-[10px] text-gray-400 mt-2 leading-tight">Proyección esperada.</div>
+                    </div>
+                    <div class="bg-cardbg border-t-4 border-gray-400 p-4 rounded-b-lg text-center">
+                        <div class="text-3xl font-bold text-white mb-1">5 <span class="text-sm text-gray-500">cm</span></div>
+                        <div class="text-xs text-gray-300 uppercase font-bold">Natural</div>
+                        <div class="text-[10px] text-gray-400 mt-2 leading-tight">Proyección esperada.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart.js Canvas -->
+            <div class="glass-card p-6 reveal h-[400px] flex items-center justify-center">
+                <canvas id="resultsChart"></canvas>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="py-24 px-6">
+        <div class="max-w-4xl mx-auto glass-card p-10 reveal border-t-4 border-t-neonGreen">
+            <h2 class="font-heading text-3xl font-bold mb-6 flex items-center gap-3">
+                <i class="fa-solid fa-microscope text-neonGreen"></i> Conclusiones del Proyecto
+            </h2>
+            <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                A través de la investigación teórica y los primeros días de nuestro experimento práctico, nuestra hipótesis demostró estar en el camino correcto. Aunque el tiempo físico del experimento fue corto, resultó suficiente para evidenciar empíricamente que la planta bajo <strong>luz roja exhibió un desarrollo de su sistema radicular (raíces) significativamente más rápido</strong> y pronunciado.
+            </p>
+            <p class="text-gray-300 text-lg leading-relaxed mb-6">
+                Teóricamente, si el experimento se prolongara, la luz roja estimularía en mayor medida los fitocromos provocando una rápida elongación del tallo. Por otro lado, bajo <strong>luz azul</strong>, se proyecta un desarrollo de hojas más robustas, mientras que con luz natural el crecimiento mantendría un ritmo estándar al carecer de la concentración focalizada del espectro óptimo para la clorofila.
+            </p>
+            <div class="bg-darkbg p-4 rounded-lg border border-white/5 text-sm text-gray-400 italic">
+                *Nota: Los valores mostrados en los gráficos de resultados son representaciones visuales de la proyección esperada a largo plazo, fuertemente respaldados por nuestra investigación teórica y la rápida respuesta observada en las raíces.*
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer updated with team credits -->
+    <footer class="border-t border-white/10 bg-black py-12 px-6 text-center mt-10">
+        <div class="max-w-4xl mx-auto">
+            <i class="fa-solid fa-flask text-neonGreen text-3xl mb-4"></i>
+            <h3 class="font-heading text-xl font-bold text-white mb-2">Proyecto de Feria de Ciencias</h3>
+            <p class="text-gray-400 text-sm mb-8 max-w-2xl mx-auto">
+                Diseño web interactivo basado en el panel expositor sobre el efecto de la luz en la fotosíntesis y crecimiento vegetal.
+            </p>
+            
+            <div class="pt-8 border-t border-white/10">
+                <p class="text-neonGreen font-medium text-sm mb-3 tracking-widest uppercase">Equipo de Investigación y Desarrollo:</p>
+                <p class="text-gray-300 text-sm md:text-base leading-relaxed font-light mb-4">
+                    Diaz Santiago, Rivas Matias, Benitez Oviedo Augusto, Soba Santiago, Mazur Santino, Galvan Maximo, Vico Juan Cruz, Jaime Matias, Gonzalez Dylan
+                </p>
+                <div class="inline-block bg-white/5 border border-white/10 rounded-full px-6 py-2 mt-2">
+                    <p class="text-purple-400 font-bold font-heading text-xs md:text-sm tracking-widest uppercase">
+                        4A - Escuela CIMDIP & Miguel Cané
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // --- 1. Scroll Reveal Animations ---
+        const revealElements = document.querySelectorAll('.reveal');
+        
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        });
+
+        revealElements.forEach(el => revealObserver.observe(el));
+
+        // --- 2. Interactive Light Lab Logic ---
+        let lightStates = { red: false, blue: false, natural: false };
+        
+        function toggleLight(color) {
+            const bulb = document.getElementById(`light-bulb-${color}`);
+            const beam = document.getElementById(`beam-${color}`);
+            const leaves = document.querySelectorAll(`.leaf-${color}`);
+            
+            // Toggle State
+            lightStates[color] = !lightStates[color];
+            let isOn = lightStates[color];
+
+            if(isOn) {
+                // Turn On Visuals
+                if(color === 'red') {
+                    bulb.classList.replace('bg-gray-800', 'bg-red-500');
+                    bulb.classList.add('glow-red', 'shadow-[0_0_30px_#ef4444]');
+                } else if(color === 'blue') {
+                    bulb.classList.replace('bg-gray-800', 'bg-blue-500');
+                    bulb.classList.add('glow-blue', 'shadow-[0_0_30px_#3b82f6]');
+                } else {
+                    bulb.classList.replace('bg-gray-800', 'bg-yellow-100');
+                    bulb.classList.add('glow-natural', 'shadow-[0_0_30px_#fef08a]');
+                }
+                
+                bulb.querySelector('i').classList.replace('text-gray-500', 'text-white');
+                beam.classList.replace('opacity-0', 'opacity-100');
+                
+                // Animate leaves opacity to represent photosynthesis active
+                leaves.forEach(leaf => leaf.classList.replace('opacity-50', 'opacity-100'));
+
+            } else {
+                // Turn Off Visuals
+                bulb.className = `w-16 h-8 bg-gray-800 rounded-b-full mb-8 z-10 transition-all duration-500 flex items-center justify-center cursor-pointer`;
+                bulb.querySelector('i').classList.replace('text-white', 'text-gray-500');
+                beam.classList.replace('opacity-100', 'opacity-0');
+                leaves.forEach(leaf => leaf.classList.replace('opacity-100', 'opacity-50'));
+            }
+        }
+
+        // --- 3. Chart.js Initialization on Scroll ---
+        let chartRendered = false;
+        const chartObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !chartRendered) {
+                renderChart();
+                chartRendered = true;
+            }
+        });
+        
+        chartObserver.observe(document.getElementById('resultados'));
+
+        function renderChart() {
+            const ctx = document.getElementById('resultsChart').getContext('2d');
+            
+            // Gradient setups for bars
+            let gradientRed = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientRed.addColorStop(0, 'rgba(239, 68, 68, 1)');
+            gradientRed.addColorStop(1, 'rgba(239, 68, 68, 0.2)');
+
+            let gradientBlue = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientBlue.addColorStop(0, 'rgba(59, 130, 246, 1)');
+            gradientBlue.addColorStop(1, 'rgba(59, 130, 246, 0.2)');
+
+            let gradientNat = ctx.createLinearGradient(0, 0, 0, 400);
+            gradientNat.addColorStop(0, 'rgba(209, 213, 219, 1)');
+            gradientNat.addColorStop(1, 'rgba(209, 213, 219, 0.2)');
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Luz Roja', 'Luz Azul', 'Luz Natural'],
+                    datasets: [{
+                        label: 'Altura Esperada (cm) - Día 21',
+                        data: [15, 8, 5],
+                        backgroundColor: [gradientRed, gradientBlue, gradientNat],
+                        borderColor: ['#ef4444', '#3b82f6', '#d1d5db'],
+                        borderWidth: 1,
+                        borderRadius: 8,
+                        barThickness: 50
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#e2e8f0', font: { family: "'Nunito', sans-serif" } }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleFont: { size: 14, family: "'Poppins', sans-serif" },
+                            bodyFont: { size: 14 },
+                            padding: 12,
+                            cornerRadius: 8,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 18,
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                            ticks: { color: '#94a3b8' },
+                            title: { display: true, text: 'Altura (cm)', color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#e2e8f0', font: { weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 4. Animated Background Particles (Photons) ---
+        const canvas = document.getElementById('bg-particles');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * -0.8 - 0.2; // Float upwards softly
+                
+                // Red, Blue, and Green colors with low opacity representing light spectrums
+                const colors = ['rgba(239, 68, 68, 0.4)', 'rgba(59, 130, 246, 0.4)', 'rgba(74, 222, 128, 0.4)'];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                // Wrap around edges gracefully
+                if (this.y < 0) this.y = canvas.height;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles = [];
+            // Responsive particle count (fewer on mobile for performance)
+            let particleCount = window.innerWidth < 768 ? 40 : 100; 
+            for (let i = 0; i < particleCount; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+
+        initParticles();
+        animateParticles();
+    </script>
+</body>
+</html>
